@@ -1,0 +1,41 @@
+stages:
+  - build
+  - docker
+
+variables:
+  GOARCH: 'amd64'
+  GOOS: 'linux'
+  CGO_ENABLED: '0'
+  GOPROXY: 'https://goproxy.io,direct'
+  VERSION: "0.0.1"
+
+build:
+  image: registry.tsdb.top:5000/golang:latest
+  stage: build
+  script:
+    - go get .
+    - go build -o its ./
+  cache:
+    key: build
+    paths:
+      - its
+  only:
+    - main
+  tags:
+    - watch
+
+docker:
+  image: docker:latest
+  stage: docker
+  script:
+    - docker build -t registry.tsdb.top:5000/its:${VERSION} ./
+    - docker login http://registry.tsdb.top:5000/ -u xxxx -p xxxx
+    - docker push registry.tsdb.top:5000/its:${VERSION}
+  cache:
+    key: build
+    paths:
+      - its
+  only:
+    - main
+  tags:
+    - watch

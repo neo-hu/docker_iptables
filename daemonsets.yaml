@@ -1,0 +1,47 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: its
+  name: its
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: its
+  template:
+    metadata:
+      labels:
+        app: its
+    spec:
+      hostNetwork: true
+      containers:
+        - name: its
+          image: registry.tsdb.top:5000/its:0.0.1
+          imagePullPolicy: Always
+          command:
+            - /its
+          volumeMounts:
+            - name: xtables-lock
+              mountPath: /run/xtables.lock
+            - name: lib-modules
+              readOnly: true
+              mountPath: /lib/modules
+              # Create on-disk volume to store exec logs
+            - mountPath: /tmp
+              name: tmp-volume
+          securityContext:
+            privileged: true
+      volumes:
+        - name: xtables-lock
+          hostPath:
+            path: /run/xtables.lock
+            type: FileOrCreate
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+            type: ''
+        - name: tmp-volume
+          emptyDir: {}
+      imagePullSecrets:
+        - name: registry
