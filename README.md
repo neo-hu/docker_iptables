@@ -9,4 +9,7 @@ docker run --rm  --cap-add NET_ADMIN --cap-add NET_RAW --network host  -it its:0
 ```
 
 需要配置k8s集群设备iptables 禁用某些端口
+```
+kubectl apply -f daemonsets.yaml
+```
 
